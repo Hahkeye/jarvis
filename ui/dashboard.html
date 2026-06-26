@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jarvis Dashboard</title>
+  <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar: Status & Quick Actions -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>⚡ Jarvis</h1>
+        <p class="status" id="status">Connecting...</p>
+      </div>
+
+      <div class="widget">
+        <h3>⏰ Active Timers</h3>
+        <div id="timerList" class="task-list">
+          <p class="empty">No active timers</p>
+        </div>
+      </div>
+
+      <div class="widget">
+        <h3>🔔 Reminders</h3>
+        <div id="reminderList" class="task-list">
+          <p class="empty">No active reminders</p>
+        </div>
+      </div>
+
+      <div class="widget">
+        <h3>☀️ Weather</h3>
+        <div id="weatherCard" class="weather-card">
+          <p class="empty">Click "Get Weather" to load</p>
+        </div>
+        <button class="btn" onclick="askAI('What is the weather in New York?')">Get Weather</button>
+      </div>
+
+      <div class="widget">
+        <h3>⚡ Quick Actions</h3>
+        <div class="quick-actions">
+          <button class="action-btn" onclick="askAI('Set a 5 minute timer')">
+            <span class="action-icon">⏱️</span>5m Timer
+          </button>
+          <button class="action-btn" onclick="askAI('Set a 15 minute timer')">
+            <span class="action-icon">⏱️</span>15m Timer
+          </button>
+          <button class="action-btn" onclick="askAI('Set a 30 minute timer')">
+            <span class="action-icon">⏱️</span>30m Timer
+          </button>
+          <button class="action-btn" onclick="askAI('Remind me in 1 hour to take a break')">
+            <span class="action-icon">🔔</span>1h Break
+          </button>
+          <button class="action-btn" onclick="askAI('Remind me at 3pm to stand up')">
+            <span class="action-icon">🔔</span>3pm Stand
+          </button>
+          <button class="action-btn" onclick="askAI('List my active tasks')">
+            <span class="action-icon">📋</span>List Tasks
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main: Chat -->
+    <main class="main">
+      <div class="messages" id="messages"></div>
+      <form class="input-row" id="form">
+        <button type="button" id="micBtn" title="Speak">🎙️</button>
+        <input id="input" type="text" placeholder="Ask me anything..." autocomplete="off">
+        <button type="submit" id="sendBtn">Send</button>
+      </form>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>

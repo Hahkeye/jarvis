@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jarvis</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="chat">
+    <div class="header">
+      <h1>Jarvis</h1>
+      <p class="status">Connecting...</p>
+    </div>
+    <div class="messages" id="messages"></div>
+    <form class="input-row" id="form">
+      <button type="button" id="micBtn" title="Speak">🎙️</button>
+      <input id="input" type="text" placeholder="Ask me anything..." autocomplete="off">
+      <button type="submit" id="sendBtn">Send</button>
+    </form>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
