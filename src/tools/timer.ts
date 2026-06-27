@@ -140,7 +140,7 @@ export const cancelTaskToolDefinition: ToolDefinition = {
   type: "function",
   function: {
     name: "cancel_task",
-    description: "Cancel a previously set timer or reminder. The id parameter must be the task ID returned when the timer or reminder was created.",
+    description: "Cancel a previously set timer or reminder. The id parameter must be the task ID returned when the timer or reminder was created (e.g. 'task_0', 'task_1'). Use list_tasks to see all active task IDs.",
     parameters: {
       type: "object",
       properties: {
@@ -158,10 +158,20 @@ export const listTasksToolDefinition: ToolDefinition = {
   type: "function",
   function: {
     name: "list_tasks",
-    description: "List all active timers and reminders for the current user.",
+    description: "List all active timers and reminders for the current user. Optionally filter by type ('timer' or 'reminder') or task ID.",
     parameters: {
       type: "object",
-      properties: {},
+      properties: {
+        type: {
+          type: "string",
+          enum: ["timer", "reminder"],
+          description: "Filter by task type (optional)",
+        },
+        id: {
+          type: "string",
+          description: "Filter by specific task ID (e.g. 'task_0')",
+        },
+      },
       required: [],
     },
   },
@@ -463,10 +473,21 @@ export const cancelTaskToolHandler: ToolHandler["handler"] = async (
 };
 
 export const listTasksToolHandler: ToolHandler["handler"] = async (
-  _args: Record<string, unknown>,
+  args: Record<string, unknown>,
   ws: WebSocket,
 ): Promise<string> => {
-  const clientTasks = listTasks(ws);
+  const filterType = typeof args.type === "string" ? args.type : undefined;
+  const filterId = typeof args.id === "string" ? args.id : undefined;
+  
+  let clientTasks = listTasks(ws);
+  
+  // Apply filters
+  if (filterType) {
+    clientTasks = clientTasks.filter(t => t.type === filterType);
+  }
+  if (filterId) {
+    clientTasks = clientTasks.filter(t => t.id === filterId);
+  }
 
   // Emit structured event for dashboard
   const event = {
