@@ -1,6 +1,6 @@
 // Development Mode JavaScript
 
-const ws = new WebSocket(`ws://${window.location.host}/ws`);
+const ws = new WebSocket(`wss://${window.location.host}/ws`);
 let currentProject = null;
 let currentFile = null;
 
