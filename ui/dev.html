@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jarvis - Development Mode</title>
+  <link rel="stylesheet" href="/dev.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="back-btn" id="backBtn" title="Back to Dashboard">← Back</button>
+        <h1>🛠️ Development Mode</h1>
+      </div>
+      <div class="header-right">
+        <span class="project-badge" id="projectBadge">No Project Selected</span>
+        <button class="btn btn-sm" id="listProjectsBtn">List Projects</button>
+        <button class="btn btn-sm" id="createProjectBtn">New Project</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Project List View -->
+      <div class="project-list" id="projectListView">
+        <h2>Your Projects</h2>
+        <div class="project-grid" id="projectGrid">
+          <!-- Projects will be populated here -->
+        </div>
+        <p class="empty-state" id="emptyProjects">No projects yet. Create your first project!</p>
+      </div>
+
+      <!-- Project View -->
+      <div class="project-view" id="projectView" style="display: none;">
+        <div class="sidebar">
+          <h3>Files</h3>
+          <div class="file-list" id="fileList">
+            <!-- Files will be populated here -->
+          </div>
+        </div>
+        
+        <div class="editor-container">
+          <div class="editor-header">
+            <span class="file-name" id="currentFileName">Select a file to edit</span>
+            <button class="btn btn-sm" id="saveBtn" disabled>Save</button>
+            <button class="btn btn-sm" id="newFileBtn">New File</button>
+          </div>
+          <textarea class="code-editor" id="codeEditor" placeholder="Select a file to edit or create a new one..."></textarea>
+        </div>
+        
+        <div class="terminal">
+          <div class="terminal-header">
+            <span>Terminal</span>
+            <button class="btn btn-sm" id="runBtn">▶ Run</button>
+            <button class="btn btn-sm" id="clearBtn">Clear</button>
+          </div>
+          <div class="terminal-output" id="terminalOutput">
+            <div class="terminal-line">Jarvis Development Environment</div>
+            <div class="terminal-line">Type commands or select a file to edit.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Creation Modal -->
+  <div class="modal" id="createProjectModal" style="display: none;">
+    <div class="modal-content">
+      <h2>Create New Project</h2>
+      <form id="createProjectForm">
+        <div class="form-group">
+          <label for="projectName">Project Name</label>
+          <input type="text" id="projectName" placeholder="my-app" required>
+        </div>
+        <div class="form-group">
+          <label for="projectDescription">Description (optional)</label>
+          <input type="text" id="projectDescription" placeholder="A short description">
+        </div>
+        <div class="form-group">
+          <label for="projectTemplate">Template</label>
+          <select id="projectTemplate">
+            <option value="empty">Empty</option>
+            <option value="bun-ts">Bun + TypeScript</option>
+            <option value="express-ts">Express + TypeScript</option>
+            <option value="next-js">Next.js</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="cancelCreateBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/dev.js"></script>
+</body>
+</html>

@@ -11,3 +11,13 @@ export {
   listTasksToolHandler,
   cleanupTasks,
 } from "./timer";
+export {
+  projectTools,
+  listProjectsToolDefinition,
+  createProjectToolDefinition,
+  selectProjectToolDefinition,
+  deleteProjectToolDefinition,
+  readProjectFileToolDefinition,
+  writeProjectFileToolDefinition,
+  listProjectFilesToolDefinition,
+} from "./project";

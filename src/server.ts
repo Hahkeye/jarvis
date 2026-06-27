@@ -15,6 +15,22 @@ import {
   listTasksToolHandler,
   cleanupTasks,
 } from "./tools/timer";
+import {
+  listProjectsToolDefinition,
+  listProjectsToolHandler,
+  createProjectToolDefinition,
+  createProjectToolHandler,
+  selectProjectToolDefinition,
+  selectProjectToolHandler,
+  deleteProjectToolDefinition,
+  deleteProjectToolHandler,
+  readProjectFileToolDefinition,
+  readProjectFileToolHandler,
+  writeProjectFileToolDefinition,
+  writeProjectFileToolHandler,
+  listProjectFilesToolDefinition,
+  listProjectFilesToolHandler,
+} from "./tools/project";
 
 const tools = [
   weatherToolDefinition,
@@ -23,6 +39,13 @@ const tools = [
   reminderToolDefinition,
   cancelTaskToolDefinition,
   listTasksToolDefinition,
+  listProjectsToolDefinition,
+  createProjectToolDefinition,
+  selectProjectToolDefinition,
+  deleteProjectToolDefinition,
+  readProjectFileToolDefinition,
+  writeProjectFileToolDefinition,
+  listProjectFilesToolDefinition,
 ];
 
 const toolHandlers = [
@@ -32,6 +55,13 @@ const toolHandlers = [
   { name: "set_reminder", handler: reminderToolHandler },
   { name: "cancel_task", handler: cancelTaskToolHandler },
   { name: "list_tasks", handler: listTasksToolHandler },
+  { name: "list_projects", handler: listProjectsToolHandler },
+  { name: "create_project", handler: createProjectToolHandler },
+  { name: "select_project", handler: selectProjectToolHandler },
+  { name: "delete_project", handler: deleteProjectToolHandler },
+  { name: "read_project_file", handler: readProjectFileToolHandler },
+  { name: "write_project_file", handler: writeProjectFileToolHandler },
+  { name: "list_project_files", handler: listProjectFilesToolHandler },
 ];
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +77,11 @@ const chatJs = readFileSync(`${uiDir}/app.js`, "utf8");
 const dashboardHtml = readFileSync(`${uiDir}/dashboard.html`, "utf8");
 const dashboardCss = readFileSync(`${uiDir}/dashboard.css`, "utf8");
 const dashboardJs = readFileSync(`${uiDir}/dashboard.js`, "utf8");
+
+// Dev Mode UI
+const devHtml = readFileSync(`${uiDir}/dev.html`, "utf8");
+const devCss = readFileSync(`${uiDir}/dev.css`, "utf8");
+const devJs = readFileSync(`${uiDir}/dev.js`, "utf8");
 
 const PORT = Number(process.env.PORT) || 3000;
 const HTTPS = process.env.HTTPS === "true";
@@ -76,6 +111,11 @@ const server = Bun.serve({
     if (url.pathname === "/dashboard") return new Response(dashboardHtml, { headers: { "Content-Type": "text/html" } });
     if (url.pathname === "/dashboard.css") return new Response(dashboardCss, { headers: { "Content-Type": "text/css" } });
     if (url.pathname === "/dashboard.js") return new Response(dashboardJs, { headers: { "Content-Type": "application/javascript" } });
+
+    // Dev Mode UI
+    if (url.pathname === "/dev") return new Response(devHtml, { headers: { "Content-Type": "text/html" } });
+    if (url.pathname === "/dev.css") return new Response(devCss, { headers: { "Content-Type": "text/css" } });
+    if (url.pathname === "/dev.js") return new Response(devJs, { headers: { "Content-Type": "application/javascript" } });
 
     // API: Config
     if (url.pathname === "/api/config") {

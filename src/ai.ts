@@ -50,6 +50,20 @@ You have access to the following tools:
 - set_reminder: Set a reminder for a specific time (e.g. "remind me at 3pm to take a break")
 - cancel_task: Cancel a timer or reminder by its task ID
 - list_tasks: List all active timers and reminders
+- list_projects: List all development projects
+- create_project: Create a new development project with a template
+- select_project: Switch to a specific project to work on it
+- delete_project: Delete a project and all its files
+- read_project_file: Read a file from the current project
+- write_project_file: Write or overwrite a file in the current project
+- list_project_files: List all files in the current project directory
+
+When the user wants to start developing, they should:
+1. Use list_projects to see available projects
+2. Use create_project to create a new project (if needed)
+3. Use select_project to switch to a project
+4. Use read/write/list tools to work on files
+5. You can also help them run commands or test code
 
 Use tools when the user asks questions that require real-time data (weather, search) or wants timers/reminders. Otherwise, answer directly.`;
 }
