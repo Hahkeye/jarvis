@@ -97,25 +97,32 @@ const server = Bun.serve({
   fetch: async (req, server) => {
     const url = new URL(req.url);
 
+    // CORS headers
+    const headers = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    };
+
     // WebSocket endpoint — upgrade to WS
     if (url.pathname === "/ws") {
       return server.upgrade(req);
     }
 
     // Chat UI
-    if (url.pathname === "/") return new Response(chatHtml, { headers: { "Content-Type": "text/html" } });
-    if (url.pathname === "/styles.css") return new Response(chatCss, { headers: { "Content-Type": "text/css" } });
-    if (url.pathname === "/app.js") return new Response(chatJs, { headers: { "Content-Type": "application/javascript" } });
+    if (url.pathname === "/") return new Response(chatHtml, { headers: { "Content-Type": "text/html", ...headers } });
+    if (url.pathname === "/styles.css") return new Response(chatCss, { headers: { "Content-Type": "text/css", ...headers } });
+    if (url.pathname === "/app.js") return new Response(chatJs, { headers: { "Content-Type": "application/javascript", ...headers } });
 
     // Dashboard UI
-    if (url.pathname === "/dashboard") return new Response(dashboardHtml, { headers: { "Content-Type": "text/html" } });
-    if (url.pathname === "/dashboard.css") return new Response(dashboardCss, { headers: { "Content-Type": "text/css" } });
-    if (url.pathname === "/dashboard.js") return new Response(dashboardJs, { headers: { "Content-Type": "application/javascript" } });
+    if (url.pathname === "/dashboard") return new Response(dashboardHtml, { headers: { "Content-Type": "text/html", ...headers } });
+    if (url.pathname === "/dashboard.css") return new Response(dashboardCss, { headers: { "Content-Type": "text/css", ...headers } });
+    if (url.pathname === "/dashboard.js") return new Response(dashboardJs, { headers: { "Content-Type": "application/javascript", ...headers } });
 
     // Dev Mode UI
-    if (url.pathname === "/dev") return new Response(devHtml, { headers: { "Content-Type": "text/html" } });
-    if (url.pathname === "/dev.css") return new Response(devCss, { headers: { "Content-Type": "text/css" } });
-    if (url.pathname === "/dev.js") return new Response(devJs, { headers: { "Content-Type": "application/javascript" } });
+    if (url.pathname === "/dev") return new Response(devHtml, { headers: { "Content-Type": "text/html", ...headers } });
+    if (url.pathname === "/dev.css") return new Response(devCss, { headers: { "Content-Type": "text/css", ...headers } });
+    if (url.pathname === "/dev.js") return new Response(devJs, { headers: { "Content-Type": "application/javascript", ...headers } });
 
     // API: Config
     if (url.pathname === "/api/config") {
