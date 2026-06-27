@@ -168,11 +168,36 @@ const server = Bun.serve({
         return;
       }
 
-      (ws as WebSocket & { isProcessing: boolean }).isProcessing = true;
-
       const messages = (ws as WebSocket & { messages: Array<{ role: string; content: string }> }).messages;
       const str = typeof event === "string" ? event : String(event);
       const msg = JSON.parse(str);
+
+      // Direct tool call from frontend (bypasses AI)
+      if (msg.type === "tool_call" && msg.tool && msg.toolArgs) {
+        console.log(`[WS] ← tool_call: ${msg.tool}`);
+        const handler = toolHandlers.find((h) => h.name === msg.tool);
+        if (handler) {
+          const toolStart = Date.now();
+          handler.handler(msg.toolArgs, ws).then((result) => {
+            const elapsed = Date.now() - toolStart;
+            console.log(`[TOOL] ${msg.tool} done  ${elapsed}ms  result=${result.slice(0, 150)}`);
+            // Tool handlers emit their own tool_result events, nothing more needed
+          }).catch((err) => {
+            console.error(`[TOOL] ${msg.tool} error:`, err);
+          });
+        } else {
+          console.warn(`[WS] unknown tool requested: ${msg.tool}`);
+        }
+        return;
+      }
+
+      if (isProcessing) {
+        console.log("[WS] message dropped — already processing");
+        return;
+      }
+
+      (ws as WebSocket & { isProcessing: boolean }).isProcessing = true;
+
       const role = typeof msg.role === "string" ? msg.role : "user";
       const content = typeof msg.content === "string" ? msg.content : "";
       messages.push({ role, content });

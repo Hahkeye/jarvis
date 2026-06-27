@@ -56,6 +56,16 @@ function sendMessage(msg) {
   }
 }
 
+// Direct tool call (bypasses AI)
+function callTool(toolName, toolArgs = {}) {
+  console.log(`[DEV] Calling tool: ${toolName}`, toolArgs);
+  ws.send(JSON.stringify({
+    type: "tool_call",
+    tool: toolName,
+    toolArgs: toolArgs,
+  }));
+}
+
 // Tool Event Handler
 function handleToolEvent(event) {
   console.log("[DEV] handleToolEvent called:", event);
@@ -71,7 +81,7 @@ function handleToolEvent(event) {
       loadProjects(); // Refresh list after creating
       break;
     case "select_project":
-      logToTerminal(`✓ ${event.result}`);
+      // Navigation already handled by openProject(), just log silently
       break;
     case "list_project_files":
       renderFiles(event.result);
@@ -90,11 +100,25 @@ function handleToolEvent(event) {
 }
 
 // Project Management
-async function loadProjects() {
-  sendMessage({
-    role: "user",
-    content: "List all my development projects",
-  });
+function loadProjects() {
+  currentProject = null;
+  projectBadge.textContent = "No project";
+  callTool("list_projects");
+}
+
+function openProject(projectName) {
+  console.log("[DEV] Opening project:", projectName);
+  currentProject = projectName;
+  projectBadge.textContent = projectName;
+  projectListView.style.display = "none";
+  projectView.style.display = "flex";
+  currentFileName.textContent = "Select a file";
+  codeEditor.value = "// Select a file to edit";
+  saveBtn.disabled = true;
+  fileList.innerHTML = '<div class="file-item">Loading...</div>';
+  
+  callTool("select_project", { name: projectName });
+  callTool("list_project_files", { directory: "." });
 }
 
 function renderProjects(projects) {
@@ -120,62 +144,56 @@ function renderProjects(projects) {
     </div>
   `).join("");
   
-  // Add click handlers
+  // Add click handlers to navigate into projects
   document.querySelectorAll(".project-card").forEach(card => {
     card.addEventListener("click", () => {
       const name = card.dataset.name;
-      selectProject(name);
+      openProject(name);
     });
-  });
-}
-
-async function selectProject(name) {
-  sendMessage({
-    role: "user",
-    content: `Select project ${name}`,
-  });
-  
-  currentProject = { name };
-  projectBadge.textContent = name;
-  projectListView.style.display = "none";
-  projectView.style.display = "flex";
-  
-  loadFiles();
-}
-
-async function loadFiles() {
-  sendMessage({
-    role: "user",
-    content: "List all files in the current project",
   });
 }
 
 function renderFiles(result) {
-  if (typeof result === "string") {
-    // Parse the text response
+  
+  let files = [];
+  if (Array.isArray(result)) {
+    // Structured result from tool_result event
+    files = result;
+  } else if (typeof result === "string") {
+    // Legacy: parse text response
     const lines = result.split("\n").filter(l => l.trim());
-    fileList.innerHTML = lines.map(line => {
-      const match = line.match(/([📁📄])\s+(.+)/);
+    files = lines.map(line => {
+      const match = line.match(/([\ud83d\udcbc\ud83d\udcc1])\s+(.+)/);
       if (match) {
-        const icon = match[1];
-        const name = match[2];
-        const isActive = currentFile === name;
-        return `<div class="file-item ${isActive ? "active" : ""}" data-name="${name}">${icon} ${name}</div>`;
+        return { name: match[2], path: match[2] };
       }
-      return "";
-    }).join("");
-    
-    // Add click handlers
-    fileList.querySelectorAll(".file-item").forEach(item => {
-      item.addEventListener("click", () => {
-        const name = item.dataset.name;
-        selectFile(name);
-      });
-    });
+      return null;
+    }).filter(Boolean);
   }
+  
+  if (files.length === 0) {
+    fileList.innerHTML = '<div class="file-item">No files found</div>';
+    return;
+  }
+  
+  fileList.innerHTML = files.map(f => `
+    <div class="file-item ${f.name === currentFile?.name ? "active" : ""}" data-name="${f.name}">
+      <span class="file-icon">${f.type === "directory" ? "📁" : "📄"}</span>
+      <span>${f.name}</span>
+      ${f.size ? `<span class="file-size">${f.size}</span>` : ""}
+    </div>
+  `).join("");
+  
+  // Add click handlers
+  fileList.querySelectorAll(".file-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const name = item.dataset.name;
+      readFile(name);
+    });
+  });
 }
 
-async function selectFile(name) {
+function readFile(name) {
   currentFile = name;
   currentFileName.textContent = name;
   
@@ -184,21 +202,15 @@ async function selectFile(name) {
     item.classList.toggle("active", item.dataset.name === name);
   });
   
-  // Load file content
-  sendMessage({
-    role: "user",
-    content: `Read the file ${name} from the current project`,
-  });
+  // Direct tool call to read file
+  callTool("read_project_file", { filePath: name });
 }
 
-async function saveFile() {
+function saveFile() {
   if (!currentFile || !codeEditor.value) return;
   
   const content = codeEditor.value;
-  sendMessage({
-    role: "user",
-    content: `Write the following content to ${currentFile} in the current project:\n\n${content}`,
-  });
+  callTool("write_project_file", { filePath: currentFile, content: content });
 }
 
 // Event Listeners
@@ -222,10 +234,7 @@ createProjectForm.addEventListener("submit", (e) => {
   const description = document.getElementById("projectDescription").value;
   const template = document.getElementById("projectTemplate").value;
   
-  sendMessage({
-    role: "user",
-    content: `Create a new project named ${name} with template ${template}. Description: ${description || "None"}`,
-  });
+  callTool("create_project", { name, description, template });
   
   createProjectModal.style.display = "none";
   createProjectForm.reset();
