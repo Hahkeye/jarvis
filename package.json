@@ -3,7 +3,8 @@
   "module": "src/server.ts",
   "scripts": {
     "start": "bun src/server.ts",
-    "dev": "bun --watch src/server.ts"
+    "dev": "bun --watch src/server.ts",
+    "setup": "bash scripts/generate-cert.sh && echo '\\nStarting server with HTTPS...\\n' && HTTPS=true bun start"
   },
   "dependencies": {
     "headroom-ai": "^0.22.4",
