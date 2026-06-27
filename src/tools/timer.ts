@@ -114,21 +114,21 @@ export const reminderToolDefinition: ToolDefinition = {
   type: "function",
   function: {
     name: "set_reminder",
-    description: "Set a reminder for a specific time in the future. Accepts time_string (e.g. 'in 10 minutes', 'at 3pm', 'at noon') or scheduled_time (ISO 8601 like '2025-07-15T09:00:00'). The message parameter should contain what to remind the user about.",
+    description: "Set a reminder for a specific time in the future. Use time_string for relative times (e.g. 'in 10 minutes', 'for 1 hour', 'in 30 seconds') or absolute times (e.g. 'at 3pm', 'at noon', '2025-07-15T09:00:00'). The message parameter describes what the reminder is about.",
     parameters: {
       type: "object",
       properties: {
         time_string: {
           type: "string",
-          description: "Human-readable time for the reminder (e.g. 'in 10 minutes', 'at 3pm', 'at noon')",
+          description: "When the reminder should fire (e.g. 'in 10 minutes', 'for 1 hour', 'at 3pm', 'at noon', '2025-07-15T09:00:00')",
         },
         scheduled_time: {
           type: "string",
-          description: "ISO 8601 date-time string (e.g. '2025-07-15T09:00:00')",
+          description: "ISO 8601 date-time string for absolute time (e.g. '2025-07-15T09:00:00')",
         },
         message: {
           type: "string",
-          description: "What to remind the user about",
+          description: "What to remind the user about (e.g. 'take a break', 'call mom', 'stretch')",
         },
       },
       required: ["message"],
@@ -342,6 +342,46 @@ export const reminderToolHandler: ToolHandler["handler"] = async (
   if (!message) return "No reminder message provided.";
 
   let trigger: Date;
+
+  // Fallback: if time_string looks like a duration and message is short, swap them
+  if (!timeString && !scheduledTime) {
+    // Check if message looks like a duration (e.g., "10 minutes", "for 1 hour")
+    const durationPattern = /^(?:for\s+)?\d+\s*(second|minute|hour)s?\b/i;
+    if (durationPattern.test(message) && message.length < 30) {
+      // Likely the user said "remind me for 10 minutes" and the LLM put the duration in message
+      const parsed = parseTime(message);
+      if (parsed) {
+        trigger = parsed;
+        // Schedule the task and return
+        const task = scheduleTask("reminder", "Reminder", trigger, ws);
+        const remaining = trigger.getTime() - Date.now();
+        const hours = Math.floor(remaining / 3600000);
+        const mins = Math.floor((remaining % 3600000) / 60000);
+        let timeStr = "";
+        if (hours > 0) timeStr += `${hours}h `;
+        if (mins > 0) timeStr += `${mins}m `;
+        timeStr = timeStr.trim();
+        const triggerFormatted = trigger.toLocaleString("en-US", {
+          weekday: "short", month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit", hour12: true,
+        });
+        const event = {
+          type: "tool_result",
+          tool: "set_reminder",
+          result: {
+            id: task.id,
+            label: "Reminder",
+            triggerTime: trigger.getTime(),
+            triggerFormatted,
+          },
+        };
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(event));
+        }
+        return `Reminder set: ${message} at ${triggerFormatted} (in ${timeStr}). Task ID: ${task.id}. I'll remind you then!`;
+      }
+    }
+  }
 
   if (scheduledTime) {
     trigger = new Date(scheduledTime);
