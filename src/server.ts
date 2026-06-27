@@ -99,8 +99,7 @@ const server = Bun.serve({
 
     // WebSocket endpoint — upgrade to WS
     if (url.pathname === "/ws") {
-      server.upgrade(req);
-      return new Response(null, { status: 101 });
+      return server.upgrade(req);
     }
 
     // Chat UI
