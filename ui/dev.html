@@ -41,24 +41,30 @@
           </div>
         </div>
         
-        <div class="editor-container">
-          <div class="editor-header">
-            <span class="file-name" id="currentFileName">Select a file to edit</span>
-            <button class="btn btn-sm" id="saveBtn" disabled>Save</button>
-            <button class="btn btn-sm" id="newFileBtn">New File</button>
+        <div class="editor-terminal-container">
+          <div class="editor-pane">
+            <div class="editor-header">
+              <span class="file-name" id="currentFileName">Select a file to edit</span>
+              <div class="editor-actions">
+                <button class="btn btn-sm" id="saveBtn" disabled>Save</button>
+                <button class="btn btn-sm" id="newFileBtn">New File</button>
+              </div>
+            </div>
+            <textarea class="code-editor" id="codeEditor" placeholder="Select a file to edit or create a new one..."></textarea>
           </div>
-          <textarea class="code-editor" id="codeEditor" placeholder="Select a file to edit or create a new one..."></textarea>
-        </div>
-        
-        <div class="terminal">
-          <div class="terminal-header">
-            <span>Terminal</span>
-            <button class="btn btn-sm" id="runBtn">▶ Run</button>
-            <button class="btn btn-sm" id="clearBtn">Clear</button>
-          </div>
-          <div class="terminal-output" id="terminalOutput">
-            <div class="terminal-line">Jarvis Development Environment</div>
-            <div class="terminal-line">Type commands or select a file to edit.</div>
+          
+          <div class="terminal-pane">
+            <div class="terminal-header">
+              <span>Terminal</span>
+              <div class="terminal-actions">
+                <button class="btn btn-sm" id="runBtn">▶ Run</button>
+                <button class="btn btn-sm" id="clearBtn">Clear</button>
+              </div>
+            </div>
+            <div class="terminal-output" id="terminalOutput">
+              <div class="terminal-line">Jarvis Development Environment</div>
+              <div class="terminal-line">Type commands or select a file to edit.</div>
+            </div>
           </div>
         </div>
       </div>

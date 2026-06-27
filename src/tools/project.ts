@@ -469,12 +469,29 @@ export const listProjectFilesToolHandler: ToolHandler["handler"] = async (
   
   try {
     const files = await readdir(fullPath, { withFileTypes: true });
-    const items = files.map(f => {
-      const type = f.isDirectory() ? "📁" : "📄";
-      return `${type} ${f.name}`;
+    const items = files.map(f => ({
+      name: f.name,
+      type: f.isDirectory() ? "directory" : "file",
+      size: "",
+    }));
+    
+    // Emit structured event for frontend
+    const event = {
+      type: "tool_result",
+      tool: "list_project_files",
+      result: items,
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
+    // Also return text for AI
+    const textItems = files.map(f => {
+      const icon = f.isDirectory() ? "📁" : "📄";
+      return `${icon} ${f.name}`;
     }).join("\n");
     
-    return `Files in ${directory || "."}:\n\n${items}`;
+    return `Files in ${directory || "."}:\n\n${textItems || "(empty directory)"}`;
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
       return `Directory not found: ${directory}`;

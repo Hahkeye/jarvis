@@ -223,12 +223,19 @@ body {
   color: white;
 }
 
-/* Editor Container */
-.editor-container {
+/* Editor + Terminal Container */
+.editor-terminal-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.editor-pane {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  min-width: 0;
 }
 
 .editor-header {
@@ -238,6 +245,11 @@ body {
   padding: 8px 16px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .file-name {
@@ -262,9 +274,9 @@ body {
   color: var(--text-secondary);
 }
 
-/* Terminal */
-.terminal {
-  height: 200px;
+/* Terminal Pane */
+.terminal-pane {
+  width: 45%;
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
@@ -280,6 +292,11 @@ body {
   font-weight: 500;
 }
 
+.terminal-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .terminal-output {
   flex: 1;
   overflow-y: auto;
@@ -287,6 +304,7 @@ body {
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   font-size: 12px;
   line-height: 1.5;
+  background: var(--bg-primary);
 }
 
 .terminal-line {
