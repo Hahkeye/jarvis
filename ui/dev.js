@@ -29,6 +29,7 @@ const cancelCreateBtn = document.getElementById("cancelCreateBtn");
 ws.onmessage = (event) => {
   try {
     const data = JSON.parse(event.data);
+    console.log("[DEV] Received message:", data.type || data.role, data);
     handleToolEvent(data);
   } catch (e) {
     console.error("Failed to parse WebSocket message:", e);
@@ -57,11 +58,20 @@ function sendMessage(msg) {
 
 // Tool Event Handler
 function handleToolEvent(event) {
+  console.log("[DEV] handleToolEvent called:", event);
   if (event.type !== "tool_result") return;
 
   switch (event.tool) {
     case "list_projects":
+      console.log("[DEV] Rendering projects:", event.result);
       renderProjects(event.result);
+      break;
+    case "create_project":
+      logToTerminal(`✓ Created project "${event.result.name}" with ${event.result.template} template`);
+      loadProjects(); // Refresh list after creating
+      break;
+    case "select_project":
+      logToTerminal(`✓ ${event.result}`);
       break;
     case "list_project_files":
       renderFiles(event.result);
@@ -88,6 +98,7 @@ async function loadProjects() {
 }
 
 function renderProjects(projects) {
+  console.log("[DEV] renderProjects called with:", projects);
   projectListView.style.display = "block";
   projectView.style.display = "none";
   
@@ -99,7 +110,7 @@ function renderProjects(projects) {
   
   emptyProjects.style.display = "none";
   projectGrid.innerHTML = projects.map(p => `
-    <div class="project-card ${p.name === currentProject?.name ? "active" : ""}" data-name="${p.name}">
+    <div class="project-card ${p.active ? "active" : ""}" data-name="${p.name}">
       <h3>${p.name}</h3>
       ${p.description ? `<p>${p.description}</p>` : ""}
       <div class="project-meta">

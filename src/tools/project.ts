@@ -186,7 +186,7 @@ export const listProjectsToolHandler: ToolHandler["handler"] = async (
 ): Promise<string> => {
   await ensureProjectsDir();
   
-  let projects: Project[] = [];
+  const projects: Array<{ name: string; description: string; created: string; fileCount: number }> = [];
   try {
     const entries = await readdir(PROJECTS_DIR, { withFileTypes: true });
     for (const entry of entries) {
@@ -197,25 +197,19 @@ export const listProjectsToolHandler: ToolHandler["handler"] = async (
         try {
           const metaContent = await readFile(metaFile, "utf-8");
           meta = JSON.parse(metaContent);
-        } catch (e) {
-          // No metadata file
-        }
+        } catch (e) { /* no metadata */ }
         
-        // Count files
         let fileCount = 0;
         try {
           const files = await readdir(projectPath, { recursive: true });
           fileCount = files.length;
-        } catch (e) {
-          // Ignore
-        }
+        } catch (e) { /* ignore */ }
         
         projects.push({
           name: entry.name,
-          path: projectPath,
           description: meta.description || "",
           created: meta.created || "Unknown",
-          files: [entry.name],
+          fileCount,
         });
       }
     }
@@ -224,12 +218,27 @@ export const listProjectsToolHandler: ToolHandler["handler"] = async (
   }
 
   const activeProject = getActiveProject(ws);
-  const response = projects.map(p => {
+  
+  // Emit structured event for frontend
+  const event = {
+    type: "tool_result",
+    tool: "list_projects",
+    result: projects.map(p => ({
+      ...p,
+      active: p.name === activeProject,
+    })),
+  };
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(event));
+  }
+
+  // Also return text for AI response
+  const textResponse = projects.map(p => {
     const isActive = p.name === activeProject ? " *" : "";
     return `- ${p.name}${isActive} (${p.created})${p.description ? ` - ${p.description}` : ""}`;
   }).join("\n");
 
-  return response || "No projects found. Use create_project to get started.";
+  return textResponse || "No projects found. Use create_project to get started.";
 };
 
 export const createProjectToolHandler: ToolHandler["handler"] = async (
@@ -337,6 +346,16 @@ export const createProjectToolHandler: ToolHandler["handler"] = async (
     
     // Set as active project
     setActiveProject(ws, name);
+    
+    // Emit structured event for frontend
+    const event = {
+      type: "tool_result",
+      tool: "create_project",
+      result: { name, template, description },
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
     
     return `Project "${name}" created successfully with "${template}" template.\n\nFiles created:\n- package.json\n- tsconfig.json\n- src/index.ts (or equivalent)\n\nThe project is now active. You can start editing files.`;
   } catch (e) {
