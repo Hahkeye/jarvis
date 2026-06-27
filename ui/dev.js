@@ -48,6 +48,13 @@ ws.onclose = () => {
   logToTerminal("Disconnected from server");
 };
 
+// --- Core Helpers ---
+function sendMessage(msg: Record<string, unknown>) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(msg));
+  }
+}
+
 // Tool Event Handler
 function handleToolEvent(event) {
   if (event.type !== "tool_result") return;
@@ -75,7 +82,7 @@ function handleToolEvent(event) {
 // Project Management
 async function loadProjects() {
   sendMessage({
-    type: "ai",
+    role: "user",
     content: "List all my development projects",
   });
 }
@@ -113,7 +120,7 @@ function renderProjects(projects) {
 
 async function selectProject(name) {
   sendMessage({
-    type: "ai",
+    role: "user",
     content: `Select project ${name}`,
   });
   
@@ -127,7 +134,7 @@ async function selectProject(name) {
 
 async function loadFiles() {
   sendMessage({
-    type: "ai",
+    role: "user",
     content: "List all files in the current project",
   });
 }
@@ -168,7 +175,7 @@ async function selectFile(name) {
   
   // Load file content
   sendMessage({
-    type: "ai",
+    role: "user",
     content: `Read the file ${name} from the current project`,
   });
 }
@@ -178,7 +185,7 @@ async function saveFile() {
   
   const content = codeEditor.value;
   sendMessage({
-    type: "ai",
+    role: "user",
     content: `Write the following content to ${currentFile} in the current project:\n\n${content}`,
   });
 }
@@ -205,7 +212,7 @@ createProjectForm.addEventListener("submit", (e) => {
   const template = document.getElementById("projectTemplate").value;
   
   sendMessage({
-    type: "ai",
+    role: "user",
     content: `Create a new project named ${name} with template ${template}. Description: ${description || "None"}`,
   });
   
@@ -243,12 +250,6 @@ codeEditor.addEventListener("input", () => {
 });
 
 // Utility Functions
-function sendMessage(msg) {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(msg));
-  }
-}
-
 function logToTerminal(message, type = "info") {
   const line = document.createElement("div");
   line.className = `terminal-line ${type}`;
