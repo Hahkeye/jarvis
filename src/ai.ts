@@ -80,6 +80,9 @@ async function streamToCompletion(
   console.log(`[AI] → ${apiUrl}/chat/completions  model=${model}  messages=${body.messages?.length || 0}  provider=${aiConfig.name}`);
   const start = Date.now();
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
   const response = await fetch(`${apiUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -87,10 +90,18 @@ async function streamToCompletion(
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
+    signal: controller.signal,
   }).catch((err) => {
-    console.error(`[AI] ✗ fetch failed: ${err.message}`);
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      console.error(`[AI] ✗ request timed out`);
+    } else {
+      console.error(`[AI] ✗ fetch failed: ${err.message}`);
+    }
     throw err;
   });
+
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
