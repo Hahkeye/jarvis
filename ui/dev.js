@@ -49,7 +49,7 @@ ws.onclose = () => {
 };
 
 // --- Core Helpers ---
-function sendMessage(msg: Record<string, unknown>) {
+function sendMessage(msg) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(msg));
   }
