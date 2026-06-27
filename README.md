@@ -75,6 +75,17 @@ bun start
 
 Then open **http://localhost:3000** in your browser.
 
+### HTTPS (for Voice Input)
+
+Web Speech API requires HTTPS. Generate a self-signed certificate:
+
+```bash
+bash scripts/generate-cert.sh
+HTTPS=true bun start
+```
+
+Accept the security warning in your browser. Voice input will now work.
+
 ### Runtime AI Provider Selection
 
 Use the ⚙️ **Settings** button in the sidebar to switch between AI providers without editing `.env`:

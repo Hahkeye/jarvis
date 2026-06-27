@@ -28,6 +28,9 @@ function showToast(message, type, duration) {
   toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + escapeHtml(message) + '</span><button class="toast-close">&times;</button>';
   toastContainerEl.appendChild(toast);
 
+  // Play audio alert
+  playAlert();
+
   toast.querySelector(".toast-close").addEventListener("click", () => {
     toast.classList.add("toast-exit");
     setTimeout(() => toast.remove(), 300);
@@ -46,6 +49,29 @@ function showToast(message, type, duration) {
     Notification.requestPermission().then((perm) => {
       if (perm === "granted") new Notification("Jarvis", { body: message });
     });
+  }
+}
+
+// --- Audio Alert ---
+function playAlert() {
+  // Try Web Audio API first
+  try {
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = "sine";
+    gainNode.gain.value = 0.3;
+    
+    oscillator.start();
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    oscillator.stop(audioCtx.currentTime + 0.5);
+  } catch (e) {
+    console.warn("Audio alert failed:", e);
   }
 }
 

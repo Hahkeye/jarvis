@@ -49,9 +49,14 @@ const dashboardCss = readFileSync(`${uiDir}/dashboard.css`, "utf8");
 const dashboardJs = readFileSync(`${uiDir}/dashboard.js`, "utf8");
 
 const PORT = Number(process.env.PORT) || 3000;
+const HTTPS = process.env.HTTPS === "true";
 
 const server = Bun.serve({
   port: PORT,
+  tls: HTTPS ? {
+    key: Bun.file("./certs/key.pem"),
+    cert: Bun.file("./certs/cert.pem"),
+  } : undefined,
 
   fetch: async (req, server) => {
     const url = new URL(req.url);
@@ -153,9 +158,12 @@ const server = Bun.serve({
   },
 });
 
-console.log(`Jarvis listening on http://localhost:${PORT}`);
-console.log(`  Chat:     http://localhost:${PORT}/`);
-console.log(`  Dashboard: http://localhost:${PORT}/dashboard`);
+console.log(`Jarvis listening on ${HTTPS ? "https" : "http"}://localhost:${PORT}`);
+console.log(`  Chat:     ${HTTPS ? "https" : "http"}://localhost:${PORT}/`);
+console.log(`  Dashboard: ${HTTPS ? "https" : "http"}://localhost:${PORT}/dashboard`);
+if (HTTPS) {
+  console.log("  Note: Self-signed certificate — accept the security warning in your browser");
+}
 
 // Graceful shutdown
 async function shutdown() {

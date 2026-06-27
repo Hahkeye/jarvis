@@ -8,6 +8,9 @@ dist/
 .env
 config.json
 
+# TLS certificates (generated)
+certs/
+
 # IDE
 .vscode/
 .idea/
