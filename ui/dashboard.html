@@ -13,6 +13,7 @@
       <div class="sidebar-header">
         <h1>⚡ Jarvis</h1>
         <p class="status" id="status">Connecting...</p>
+        <button class="btn-settings" id="settingsBtn" title="Settings">⚙️</button>
       </div>
 
       <div class="widget">
@@ -74,6 +75,50 @@
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>AI Provider Settings</h2>
+        <button class="close-btn" id="closeSettings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="providerSelect">Select Provider</label>
+          <select id="providerSelect" class="form-control">
+            <option value="">Loading...</option>
+          </select>
+          <small class="help-text">Choose a preset or select "Custom" to enter your own settings</small>
+        </div>
+
+        <div class="form-group">
+          <label for="baseUrl">API Base URL</label>
+          <input type="text" id="baseUrl" class="form-control" placeholder="https://api.openai.com/v1">
+          <small class="help-text">e.g., http://localhost:8080/v1, https://api.openai.com/v1</small>
+        </div>
+
+        <div class="form-group">
+          <label for="apiKey">API Key</label>
+          <input type="password" id="apiKey" class="form-control" placeholder="sk-... or leave empty for local">
+          <small class="help-text">Leave empty for local providers like Ollama or llama.cpp</small>
+        </div>
+
+        <div class="form-group">
+          <label for="model">Model</label>
+          <input type="text" id="model" class="form-control" placeholder="llama3.2, gpt-4o-mini, etc.">
+          <small class="help-text">The model name to use</small>
+        </div>
+
+        <div class="form-group">
+          <button class="btn btn-primary" id="saveSettings">Save & Apply</button>
+          <button class="btn" id="cancelSettings">Cancel</button>
+        </div>
+
+        <div id="settingsStatus" class="settings-status"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="/dashboard.js"></script>
 </body>

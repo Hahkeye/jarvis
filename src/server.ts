@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { handleAI } from "./ai";
+import { getConfig, getPresets, updateConfig } from "./config";
 import { searchToolDefinition, searchToolHandler, closeBrowser } from "./tools/search";
 import { weatherToolDefinition, weatherToolHandler } from "./tools/weather";
 import {
@@ -52,7 +53,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const server = Bun.serve({
   port: PORT,
 
-  fetch(req, server) {
+  fetch: async (req, server) => {
     const url = new URL(req.url);
 
     // WebSocket endpoint — upgrade to WS
@@ -70,6 +71,30 @@ const server = Bun.serve({
     if (url.pathname === "/dashboard") return new Response(dashboardHtml, { headers: { "Content-Type": "text/html" } });
     if (url.pathname === "/dashboard.css") return new Response(dashboardCss, { headers: { "Content-Type": "text/css" } });
     if (url.pathname === "/dashboard.js") return new Response(dashboardJs, { headers: { "Content-Type": "application/javascript" } });
+
+    // API: Config
+    if (url.pathname === "/api/config") {
+      if (req.method === "GET") {
+        return new Response(JSON.stringify(getConfig()), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "POST") {
+        const provider = await req.json();
+        updateConfig(provider);
+        return new Response(JSON.stringify(getConfig()), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    // API: Presets
+    if (url.pathname === "/api/config/presets") {
+      return new Response(JSON.stringify(getPresets()), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     return new Response("Not found", { status: 404 });
   },

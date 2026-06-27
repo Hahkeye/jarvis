@@ -425,6 +425,121 @@ form.addEventListener("submit", (e) => {
 
 micBtn.addEventListener("click", toggleListening);
 
+// --- Settings Modal ---
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsModal = document.getElementById("settingsModal");
+const closeSettings = document.getElementById("closeSettings");
+const cancelSettings = document.getElementById("cancelSettings");
+const saveSettings = document.getElementById("saveSettings");
+const providerSelect = document.getElementById("providerSelect");
+const baseUrlInput = document.getElementById("baseUrl");
+const apiKeyInput = document.getElementById("apiKey");
+const modelInput = document.getElementById("model");
+const settingsStatus = document.getElementById("settingsStatus");
+
+async function loadPresets() {
+  try {
+    const res = await fetch("/api/config/presets");
+    const presets = await res.json();
+    providerSelect.innerHTML = "";
+    presets.forEach((preset, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = `${preset.icon} ${preset.name}`;
+      providerSelect.appendChild(opt);
+    });
+  } catch (e) {
+    providerSelect.innerHTML = '<option value="">Error loading presets</option>';
+  }
+}
+
+async function loadConfig() {
+  try {
+    const res = await fetch("/api/config");
+    const config = await res.json();
+    baseUrlInput.value = config.baseUrl || "";
+    apiKeyInput.value = config.apiKey || "";
+    modelInput.value = config.model || "";
+    
+    const presets = providerSelect.options;
+    let found = false;
+    for (let i = 0; i < presets.length; i++) {
+      if (presets[i].text === `${config.icon} ${config.name}`) {
+        providerSelect.value = i;
+        found = true;
+        break;
+      }
+    }
+    if (!found) providerSelect.value = "custom";
+  } catch (e) {
+    console.error("Failed to load config:", e);
+  }
+}
+
+async function saveSettingsHandler() {
+  saveSettings.disabled = true;
+  settingsStatus.className = "settings-status";
+  settingsStatus.textContent = "Saving...";
+  settingsStatus.style.display = "block";
+
+  const provider = {
+    name: providerSelect.value === "custom" ? "Custom" : providerSelect.options[providerSelect.value].text.replace(/^[\u{1F300}-\u{1FAFF}]\s*/u, "").trim(),
+    baseUrl: baseUrlInput.value.trim(),
+    apiKey: apiKeyInput.value.trim(),
+    model: modelInput.value.trim(),
+    icon: providerSelect.value === "custom" ? "⚙️" : providerSelect.options[providerSelect.value].text[0]
+  };
+
+  if (!provider.baseUrl || !provider.model) {
+    settingsStatus.textContent = "Base URL and Model are required";
+    settingsStatus.className = "settings-status error";
+    saveSettings.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(provider),
+    });
+    const saved = await res.json();
+    settingsStatus.textContent = `✅ Saved: ${saved.name} (${saved.baseUrl})`;
+    settingsStatus.className = "settings-status success";
+    
+    setTimeout(() => {
+      settingsModal.classList.remove("active");
+    }, 1500);
+  } catch (e) {
+    settingsStatus.textContent = `❌ Failed: ${e.message}`;
+    settingsStatus.className = "settings-status error";
+  } finally {
+    saveSettings.disabled = false;
+  }
+}
+
+settingsBtn.addEventListener("click", () => {
+  loadPresets();
+  loadConfig();
+  settingsModal.classList.add("active");
+});
+
+closeSettings.addEventListener("click", () => {
+  settingsModal.classList.remove("active");
+});
+
+cancelSettings.addEventListener("click", () => {
+  settingsModal.classList.remove("active");
+});
+
+saveSettings.addEventListener("click", saveSettingsHandler);
+
+settingsModal.addEventListener("click", (e) => {
+  if (e.target === settingsModal) {
+    settingsModal.classList.remove("active");
+  }
+});
+
 // --- Timer countdown updater ---
 setInterval(() => {
   if (activeTimers.length > 0) {

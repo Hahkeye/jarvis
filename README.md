@@ -16,7 +16,7 @@ cp .env.example .env
 
 ### AI Provider
 
-Jarvis uses an OpenAI-compatible API. By default it connects to a local [llama.cpp](https://github.com/ggml-org/llama.cpp) server:
+Jarvis uses an OpenAI-compatible API. Configure it in `.env`:
 
 ```env
 OPENAI_BASE_URL=http://localhost:8080/v1
@@ -24,7 +24,18 @@ OPENAI_API_KEY=
 OPENAI_MODEL=llama3.2
 ```
 
-You can also point it at Ollama, OpenAI, LM Studio, or any other OpenAI-compatible endpoint by updating `.env`.
+#### Supported Providers
+
+| Provider | Base URL | API Key | Model |
+|---|---|---|---|
+| **Local llama.cpp** | `http://localhost:8080/v1` | (none) | `llama3.2` |
+| **Ollama** | `http://localhost:11434/v1` | `ollama` | `llama3.2` |
+| **OpenAI** | `https://api.openai.com/v1` | `sk-...` | `gpt-4o-mini` |
+| **LM Studio** | `http://localhost:1234/v1` | `lm-studio` | (any local) |
+| **Mistral** | `https://api.mistral.ai/v1` | `your-key` | `mistral-small` |
+| **Groq** | `https://api.groq.com/openai/v1` | `your-key` | `llama3-70b` |
+
+Any OpenAI-compatible endpoint works — just set `OPENAI_BASE_URL` and `OPENAI_API_KEY`.
 
 #### Running llama.cpp
 
@@ -63,6 +74,16 @@ bun start
 ```
 
 Then open **http://localhost:3000** in your browser.
+
+### Runtime AI Provider Selection
+
+Use the ⚙️ **Settings** button in the sidebar to switch between AI providers without editing `.env`:
+
+- **Preset options**: Local llama.cpp, Ollama, OpenAI, LM Studio, Mistral, Groq, or Custom
+- **Persistent**: Settings save to `config.json` and persist across restarts
+- **Quick toggle**: Switch between local and remote providers dynamically
+
+![Settings](settings-screenshot.png)
 
 ## Features
 
@@ -121,7 +142,7 @@ Then open **http://localhost:3000** in your browser.
 - **Runtime:** Bun
 - **Language:** TypeScript
 - **Frontend:** Vanilla HTML/CSS/JS (no framework)
-- **AI:** OpenAI-compatible API (llama.cpp default, Ollama/OpenAI/LM Studio also supported)
+- **AI:** OpenAI-compatible API (llama.cpp, Ollama, OpenAI, Mistral, Groq, LM Studio)
 - **Search:** Puppeteer + DuckDuckGo HTML
 - **Weather:** Open-Meteo (no API key needed)
 - **Voice:** Web Speech API

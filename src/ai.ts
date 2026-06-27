@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { getConfig } from "./config";
+
 export interface ToolDefinition {
   type: "function";
   function: {
@@ -54,11 +58,12 @@ async function streamToCompletion(
   body: Record<string, unknown>,
   onChunk: (text: string) => void,
 ): Promise<{ content: string; toolCalls: Array<{ id: string; name: string; arguments: string }> }> {
-  const apiUrl = process.env.OPENAI_BASE_URL || "http://localhost:8080/v1";
-  const apiKey = process.env.OPENAI_API_KEY || "";
-  const model = (body.model as string) || "unknown";
+  const aiConfig = getConfig();
+  const apiUrl = aiConfig.baseUrl;
+  const apiKey = aiConfig.apiKey;
+  const model = aiConfig.model;
 
-  console.log(`[AI] → ${apiUrl}/chat/completions  model=${model}  messages=${body.messages?.length || 0}`);
+  console.log(`[AI] → ${apiUrl}/chat/completions  model=${model}  messages=${body.messages?.length || 0}  provider=${aiConfig.name}`);
   const start = Date.now();
 
   const response = await fetch(`${apiUrl}/chat/completions`, {
@@ -150,8 +155,9 @@ export async function handleAI(
   while (toolTurns < maxToolTurns) {
     console.log(`[AI] --- tool turn ${toolTurns + 1}/${maxToolTurns}  context=${allMessages.length} messages`);
     const systemPrompt = buildSystemPrompt();
+    const aiConfig = getConfig();
     const body: Record<string, unknown> = {
-      model: process.env.OPENAI_MODEL || "llama3.2",
+      model: aiConfig.model || "llama3.2",
       messages: [{ role: "system", content: systemPrompt }, ...allMessages],
       stream: true,
     };
