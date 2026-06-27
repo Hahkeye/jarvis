@@ -106,7 +106,10 @@ const server = Bun.serve({
 
     // WebSocket endpoint — upgrade to WS
     if (url.pathname === "/ws") {
-      return server.upgrade(req);
+      console.log("[WS] Upgrade requested");
+      const result = server.upgrade(req);
+      console.log("[WS] Upgrade result:", result);
+      return result;
     }
 
     // Chat UI
@@ -189,11 +192,15 @@ const server = Bun.serve({
         console.log(`[WS] → done  response=${response.slice(0, 100)}`);
       }).catch((err: unknown) => {
         console.error("[WS] AI error:", err);
-        ws.send(JSON.stringify({
-          type: "chunk",
-          content: "Sorry, I encountered an error processing your request.",
-        }));
-        ws.send(JSON.stringify({ type: "done", from: "assistant" }));
+        try {
+          ws.send(JSON.stringify({
+            type: "chunk",
+            content: `Sorry, I encountered an error processing your request.`,
+          }));
+          ws.send(JSON.stringify({ type: "done", from: "assistant" }));
+        } catch (e) {
+          console.error("[WS] Failed to send error message:", e);
+        }
       }).finally(() => {
         (ws as WebSocket & { isProcessing: boolean }).isProcessing = false;
       });

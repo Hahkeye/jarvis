@@ -87,6 +87,9 @@ async function streamToCompletion(
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
+  }).catch((err) => {
+    console.error(`[AI] ✗ fetch failed: ${err.message}`);
+    throw err;
   });
 
   if (!response.ok) {
