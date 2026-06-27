@@ -87,6 +87,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const HTTPS = process.env.HTTPS === "true";
 
 const server = Bun.serve({
+  host: "0.0.0.0",
   port: PORT,
   tls: HTTPS ? {
     key: Bun.file("./certs/key.pem"),
