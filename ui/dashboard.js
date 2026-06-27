@@ -56,7 +56,9 @@ function showToast(message, type, duration) {
 function playAlert() {
   // Try Web Audio API first
   try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioCtx = window.AudioContext || window["webkitAudioContext"] || null;
+    if (!AudioCtx) return;
+    const audioCtx = new AudioCtx();
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
