@@ -180,22 +180,26 @@ export async function handleAI(
 
   console.log(`[AI] === handleAI start  user_messages=${messages.length}`);
 
-  while (toolTurns < maxToolTurns) {
-    console.log(`[AI] --- tool turn ${toolTurns + 1}/${maxToolTurns}  context=${allMessages.length} messages`);
-    const systemPrompt = buildSystemPrompt();
-    const aiConfig = getConfig();
-    const body: Record<string, unknown> = {
-      model: aiConfig.model || "llama3.2",
-      messages: [{ role: "system", content: systemPrompt }, ...allMessages],
-      stream: true,
-    };
+  try {
+    while (toolTurns < maxToolTurns) {
+      console.log(`[AI] --- tool turn ${toolTurns + 1}/${maxToolTurns}  context=${allMessages.length} messages`);
+      const systemPrompt = buildSystemPrompt();
+      const aiConfig = getConfig();
+      const body: Record<string, unknown> = {
+        model: aiConfig.model || "llama3.2",
+        messages: [{ role: "system", content: systemPrompt }, ...allMessages],
+        stream: true,
+      };
 
-    if (tools.length > 0) {
-      body.tools = tools;
-      body.tool_choice = "auto";
-    }
+      if (tools.length > 0) {
+        body.tools = tools;
+        body.tool_choice = "auto";
+      }
 
-    const { content, toolCalls } = await streamToCompletion(body, onChunk);
+      const { content, toolCalls } = await streamToCompletion(body, onChunk).catch((err) => {
+        console.error(`[AI] ✗ streamToCompletion error: ${err.message}`);
+        throw err;
+      });
 
     if (toolCalls.length === 0) {
       const totalElapsed = Date.now() - totalStart;
@@ -238,6 +242,10 @@ export async function handleAI(
     }
 
     toolTurns++;
+    }
+  } catch (err) {
+    console.error(`[AI] ✗ handleAI error: ${err.message}`);
+    throw err;
   }
 
   const totalElapsed = Date.now() - totalStart;
