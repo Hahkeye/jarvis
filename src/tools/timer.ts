@@ -235,6 +235,18 @@ function parseTime(timeString: string): Date | null {
     return result;
   }
 
+  // Handle "for X minutes/hours" or just "X minutes/hours"
+  const forMatch = lower.match(/^(?:for\s+)?(\d+)\s*(second|minute|hour)s?\b/);
+  if (forMatch) {
+    const val = parseInt(forMatch[1], 10);
+    const unit = forMatch[2];
+    const result = new Date(now);
+    if (unit.startsWith("hour")) result.setHours(result.getHours() + val);
+    else if (unit.startsWith("min")) result.setMinutes(result.getMinutes() + val);
+    else result.setSeconds(result.getSeconds() + val);
+    return result;
+  }
+
   const atMatch = lower.match(/^at\s+(\d{1,2}):(\d{2})\s*(am|pm)?/);
   if (atMatch) {
     let hours = parseInt(atMatch[1], 10);
@@ -336,7 +348,7 @@ export const reminderToolHandler: ToolHandler["handler"] = async (
     if (isNaN(trigger.getTime())) return "Invalid scheduled time. Please provide a valid ISO date-time string.";
   } else if (timeString) {
     trigger = parseTime(timeString);
-    if (!trigger) return `Could not parse time "${timeString}". Please use formats like "in 10 minutes", "at 3pm", "at noon", or an ISO date-time string.`;
+    if (!trigger) return `Could not parse time "${timeString}". Please use formats like "in 10 minutes", "for 1 hour", "at 3pm", "at noon", or an ISO date-time string.`;
   } else {
     return "No time provided for the reminder. Please specify when you want to be reminded.";
   }
