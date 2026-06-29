@@ -21,6 +21,7 @@ const newFileBtn = document.getElementById("newFileBtn");
 const runBtn = document.getElementById("runBtn");
 const clearBtn = document.getElementById("clearBtn");
 const terminalOutput = document.getElementById("terminalOutput");
+const terminalInput = document.getElementById("terminalInput");
 const createProjectModal = document.getElementById("createProjectModal");
 const createProjectForm = document.getElementById("createProjectForm");
 const cancelCreateBtn = document.getElementById("cancelCreateBtn");
@@ -29,7 +30,6 @@ const cancelCreateBtn = document.getElementById("cancelCreateBtn");
 ws.onmessage = (event) => {
   try {
     const data = JSON.parse(event.data);
-    console.log("[DEV] Received message:", data.type || data.role, data);
     handleToolEvent(data);
   } catch (e) {
     console.error("Failed to parse WebSocket message:", e);
@@ -50,15 +50,8 @@ ws.onclose = () => {
 };
 
 // --- Core Helpers ---
-function sendMessage(msg) {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(msg));
-  }
-}
-
 // Direct tool call (bypasses AI)
 function callTool(toolName, toolArgs = {}) {
-  console.log(`[DEV] Calling tool: ${toolName}`, toolArgs);
   ws.send(JSON.stringify({
     type: "tool_call",
     tool: toolName,
@@ -68,31 +61,36 @@ function callTool(toolName, toolArgs = {}) {
 
 // Tool Event Handler
 function handleToolEvent(event) {
-  console.log("[DEV] handleToolEvent called:", event);
   if (event.type !== "tool_result") return;
 
   switch (event.tool) {
     case "list_projects":
-      console.log("[DEV] Rendering projects:", event.result);
       renderProjects(event.result);
       break;
     case "create_project":
-      logToTerminal(`✓ Created project "${event.result.name}" with ${event.result.template} template`);
+      logToTerminal(`Created project "${event.result.name}" with ${event.result.template} template`);
       loadProjects(); // Refresh list after creating
       break;
+    case "delete_project":
+      logToTerminal(`Deleted project "${event.result.replace(/"/g, "")}"`);
+      loadProjects(); // Refresh list after deleting
+      break;
     case "select_project":
-      // Navigation already handled by openProject(), just log silently
+      // Navigation already handled by openProject()
       break;
     case "list_project_files":
       renderFiles(event.result);
       break;
     case "read_project_file":
       codeEditor.value = event.result;
-      saveBtn.disabled = true;
+      saveBtn.disabled = false;
       break;
     case "write_project_file":
-      logToTerminal(`✓ ${event.result}`);
+      logToTerminal(`Saved ${event.result}`);
       saveBtn.disabled = true;
+      break;
+    case "execute_command":
+      logToTerminal(event.result, "success");
       break;
     default:
       logToTerminal(event.result);
@@ -107,7 +105,6 @@ function loadProjects() {
 }
 
 function openProject(projectName) {
-  console.log("[DEV] Opening project:", projectName);
   currentProject = projectName;
   projectBadge.textContent = projectName;
   projectListView.style.display = "none";
@@ -122,7 +119,6 @@ function openProject(projectName) {
 }
 
 function renderProjects(projects) {
-  console.log("[DEV] renderProjects called with:", projects);
   projectListView.style.display = "block";
   projectView.style.display = "none";
   
@@ -135,7 +131,10 @@ function renderProjects(projects) {
   emptyProjects.style.display = "none";
   projectGrid.innerHTML = projects.map(p => `
     <div class="project-card ${p.active ? "active" : ""}" data-name="${p.name}">
-      <h3>${p.name}</h3>
+      <div class="project-header">
+        <h3>${p.name}</h3>
+        <button class="btn btn-sm delete-btn" data-name="${p.name}" title="Delete project">🗑️</button>
+      </div>
       ${p.description ? `<p>${p.description}</p>` : ""}
       <div class="project-meta">
         <span>${p.created}</span>
@@ -146,30 +145,28 @@ function renderProjects(projects) {
   
   // Add click handlers to navigate into projects
   document.querySelectorAll(".project-card").forEach(card => {
-    card.addEventListener("click", () => {
+    card.addEventListener("click", (e) => {
+      // Don't navigate if clicking delete button
+      if (e.target.closest(".delete-btn")) return;
       const name = card.dataset.name;
       openProject(name);
+    });
+  });
+  
+  // Add delete handlers
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const name = btn.dataset.name;
+      if (confirm(`Delete project "${name}"? This cannot be undone.`)) {
+        callTool("delete_project", { name });
+      }
     });
   });
 }
 
 function renderFiles(result) {
-  
-  let files = [];
-  if (Array.isArray(result)) {
-    // Structured result from tool_result event
-    files = result;
-  } else if (typeof result === "string") {
-    // Legacy: parse text response
-    const lines = result.split("\n").filter(l => l.trim());
-    files = lines.map(line => {
-      const match = line.match(/([\ud83d\udcbc\ud83d\udcc1])\s+(.+)/);
-      if (match) {
-        return { name: match[2], path: match[2] };
-      }
-      return null;
-    }).filter(Boolean);
-  }
+  let files = Array.isArray(result) ? result : [];
   
   if (files.length === 0) {
     fileList.innerHTML = '<div class="file-item">No files found</div>';
@@ -253,13 +250,22 @@ newFileBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", saveFile);
 
 runBtn.addEventListener("click", () => {
-  const command = prompt("Enter command to run (e.g., 'npm start', 'bun dev'):");
-  if (command) {
-    logToTerminal(`$ ${command}`);
-    // In a real implementation, this would execute the command via a backend API
-    logToTerminal("Command executed (simulated)", "success");
+  if (terminalInput.value.trim()) {
+    executeCommand(terminalInput.value.trim());
   }
 });
+
+terminalInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && terminalInput.value.trim()) {
+    executeCommand(terminalInput.value.trim());
+  }
+});
+
+function executeCommand(command) {
+  logToTerminal(`$ ${command}`);
+  terminalInput.value = "";
+  callTool("execute_command", { command });
+}
 
 clearBtn.addEventListener("click", () => {
   terminalOutput.innerHTML = "";

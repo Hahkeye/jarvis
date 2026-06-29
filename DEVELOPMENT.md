@@ -1,5 +1,9 @@
 # Development Notes
 
+## 🚨 NEVER PUSH TO GITHUB WITHOUT EXPLICIT PERMISSION
+
+**Rule:** Only commit and push when the user says "yes", "push it", "commit and push", or equivalent explicit approval. Never push on your own initiative, even if the code compiles and looks good.
+
 ## ❌ CRITICAL: Don't Use TypeScript Syntax in JS Files
 
 **Problem:** Accidentally used TypeScript type annotations in `.js` files.

@@ -30,6 +30,7 @@ import {
   writeProjectFileToolHandler,
   listProjectFilesToolDefinition,
   listProjectFilesToolHandler,
+  executeCommandToolHandler,
 } from "./tools/project";
 
 const tools = [
@@ -62,6 +63,7 @@ const toolHandlers = [
   { name: "read_project_file", handler: readProjectFileToolHandler },
   { name: "write_project_file", handler: writeProjectFileToolHandler },
   { name: "list_project_files", handler: listProjectFilesToolHandler },
+  { name: "execute_command", handler: executeCommandToolHandler },
 ];
 
 const __filename = fileURLToPath(import.meta.url);

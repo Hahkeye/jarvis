@@ -5,10 +5,72 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-body: #0a0a0f;
+  --bg-sidebar: #111118;
+  --bg-widget: #18181f;
+  --bg-task: #1e1e28;
+  --bg-input: #09090b;
+  --bg-mic: #27272a;
+  --bg-mic-hover: #3f3f46;
+  --bg-assistant: #1e1e28;
+  --bg-toast: #1e293b;
+  --bg-modal: #111118;
+  --bg-modal-content: #111118;
+  --bg-form: #18181b;
+  --bg-mic-listening: #dc2626;
+  --border-main: #27272a;
+  --border-input: #3f3f46;
+  --border-hover: #3b82f6;
+  --border-close-hover: #27272a;
+  --text-body: #e4e4e7;
+  --text-muted: #71717a;
+  --text-heading: #a1a1aa;
+  --text-empty: #52525b;
+  --text-toast: #e2e8f0;
+  --text-toast-close: #94a3b8;
+  --text-toast-close-hover: #e2e8f0;
+  --dot-color: #71717a;
+  --dot-color-hover: #e4e4e7;
+  --close-color: #a1a1aa;
+  --close-color-hover: #e4e4e7;
+}
+
+[data-theme="light"] {
+  --bg-body: #f5f5f5;
+  --bg-sidebar: #ffffff;
+  --bg-widget: #ffffff;
+  --bg-task: #f4f4f5;
+  --bg-input: #ffffff;
+  --bg-mic: #e4e4e7;
+  --bg-mic-hover: #d4d4d8;
+  --bg-assistant: #f4f4f5;
+  --bg-toast: #ffffff;
+  --bg-modal: rgba(0, 0, 0, 0.4);
+  --bg-modal-content: #ffffff;
+  --bg-form: #f4f4f5;
+  --bg-mic-listening: #dc2626;
+  --border-main: #e4e4e7;
+  --border-input: #d4d4d8;
+  --border-hover: #3b82f6;
+  --border-close-hover: #e4e4e7;
+  --text-body: #18181b;
+  --text-muted: #71717a;
+  --text-heading: #52525b;
+  --text-empty: #a1a1aa;
+  --text-toast: #18181b;
+  --text-toast-close: #71717a;
+  --text-toast-close-hover: #18181b;
+  --dot-color: #a1a1aa;
+  --dot-color-hover: #18181b;
+  --close-color: #71717a;
+  --close-color-hover: #18181b;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0a0a0f;
-  color: #e4e4e7;
+  background: var(--bg-body);
+  color: var(--text-body);
   height: 100vh;
   overflow: hidden;
 }
@@ -23,8 +85,8 @@ body {
 .sidebar {
   width: 320px;
   flex-shrink: 0;
-  background: #111118;
-  border-right: 1px solid #27272a;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-main);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -34,7 +96,11 @@ body {
 
 .sidebar-header {
   padding-bottom: 8px;
-  border-bottom: 1px solid #27272a;
+  border-bottom: 1px solid var(--border-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .sidebar-header h1 {
@@ -54,8 +120,8 @@ body {
 
 /* --- Widgets --- */
 .widget {
-  background: #18181f;
-  border: 1px solid #27272a;
+  background: var(--bg-widget);
+  border: 1px solid var(--border-main);
   border-radius: 12px;
   padding: 14px;
 }
@@ -63,7 +129,7 @@ body {
 .widget h3 {
   font-size: 13px;
   font-weight: 600;
-  color: #a1a1aa;
+  color: var(--text-heading);
   margin-bottom: 10px;
   letter-spacing: 0.02em;
 }
@@ -77,7 +143,7 @@ body {
 
 .task-list .empty {
   font-size: 12px;
-  color: #52525b;
+  color: var(--text-empty);
   font-style: italic;
 }
 
@@ -85,7 +151,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #1e1e28;
+  background: var(--bg-task);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
@@ -105,7 +171,7 @@ body {
 
 .task-item-time {
   font-size: 11px;
-  color: #71717a;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -156,18 +222,18 @@ body {
 .weather-card .temp {
   font-size: 24px;
   font-weight: 700;
-  color: #e4e4e7;
+  color: var(--text-body);
 }
 
 .weather-card .details {
   font-size: 12px;
-  color: #71717a;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
 .weather-card .location {
   font-size: 12px;
-  color: #a1a1aa;
+  color: var(--text-heading);
   margin-top: 6px;
 }
 
@@ -175,9 +241,9 @@ body {
   margin-top: 10px;
   width: 100%;
   padding: 8px;
-  background: #27272a;
-  color: #e4e4e7;
-  border: 1px solid #3f3f46;
+  background: var(--bg-mic);
+  color: var(--text-body);
+  border: 1px solid var(--border-input);
   border-radius: 8px;
   font-size: 12px;
   cursor: pointer;
@@ -201,18 +267,18 @@ body {
   align-items: center;
   gap: 4px;
   padding: 12px 8px;
-  background: #1e1e28;
-  border: 1px solid #27272a;
+  background: var(--bg-task);
+  border: 1px solid var(--border-main);
   border-radius: 10px;
-  color: #e4e4e7;
+  color: var(--text-body);
   font-size: 11px;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
 
 .action-btn:hover {
-  background: #27272a;
-  border-color: #3b82f6;
+  background: var(--bg-mic-hover);
+  border-color: var(--border-hover);
 }
 
 .action-btn .action-icon {
@@ -254,8 +320,8 @@ body {
 
 .message.assistant {
   align-self: flex-start;
-  background: #1e1e28;
-  color: #e4e4e7;
+  background: var(--bg-assistant);
+  color: var(--text-body);
   border-bottom-left-radius: 4px;
 }
 
@@ -270,7 +336,7 @@ body {
 
 .message.typing {
   align-self: flex-start;
-  background: #1e1e28;
+  background: var(--bg-assistant);
   padding: 12px 16px;
   border-radius: 14px;
   border-bottom-left-radius: 4px;
@@ -284,7 +350,7 @@ body {
 .typing-dots span {
   width: 8px;
   height: 8px;
-  background: #71717a;
+  background: var(--dot-color);
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -300,7 +366,7 @@ body {
 /* --- Input Row --- */
 .input-row {
   padding: 12px 16px;
-  border-top: 1px solid #27272a;
+  border-top: 1px solid var(--border-main);
   display: flex;
   gap: 8px;
   flex-shrink: 0;
@@ -310,10 +376,10 @@ body {
 .input-row input {
   flex: 1;
   padding: 10px 14px;
-  border: 1px solid #3f3f46;
+  border: 1px solid var(--border-input);
   border-radius: 8px;
-  background: #09090b;
-  color: #e4e4e7;
+  background: var(--bg-input);
+  color: var(--text-body);
   font-size: 14px;
   outline: none;
 }
@@ -349,9 +415,9 @@ body {
 
 #micBtn {
   padding: 10px 12px;
-  background: #27272a;
-  color: #e4e4e7;
-  border: 1px solid #3f3f46;
+  background: var(--bg-mic);
+  color: var(--text-body);
+  border: 1px solid var(--border-input);
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
@@ -359,7 +425,7 @@ body {
 }
 
 #micBtn:hover {
-  background: #3f3f46;
+  background: var(--bg-mic-hover);
 }
 
 #micBtn.listening {
@@ -392,8 +458,8 @@ body {
   gap: 10px;
   padding: 14px 18px;
   border-radius: 10px;
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--bg-toast);
+  color: var(--text-toast);
   font-size: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   animation: toast-in 0.35s ease-out;
@@ -429,7 +495,7 @@ body {
 .toast-close {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--text-toast-close);
   font-size: 18px;
   cursor: pointer;
   padding: 0 0 0 8px;
@@ -497,7 +563,23 @@ body {
 }
 
 .btn-settings:hover {
-  background: #27272a;
+  background: var(--bg-mic-hover);
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-mic-hover);
+  border-color: var(--border-hover);
 }
 
 /* --- Modal --- */
@@ -508,7 +590,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--bg-modal);
   z-index: 1000;
   align-items: center;
   justify-content: center;
@@ -519,8 +601,8 @@ body {
 }
 
 .modal-content {
-  background: #111118;
-  border: 1px solid #27272a;
+  background: var(--bg-modal-content);
+  border: 1px solid var(--border-main);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
@@ -533,8 +615,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #27272a;
-}
+  border-bottom: 1px solid var(--border-main);
 
 .modal-header h2 {
   font-size: 18px;
@@ -545,7 +626,7 @@ body {
   background: none;
   border: none;
   font-size: 24px;
-  color: #a1a1aa;
+  color: var(--close-color);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -557,8 +638,8 @@ body {
 }
 
 .close-btn:hover {
-  background: #27272a;
-  color: #e4e4e7;
+  background: var(--border-close-hover);
+  color: var(--close-color-hover);
 }
 
 .modal-body {
@@ -581,8 +662,8 @@ body {
 }
 
 .form-control {
-  background: #18181b;
-  border: 1px solid #27272a;
+  background: var(--bg-form);
+  border: 1px solid var(--border-main);
   border-radius: 8px;
   padding: 10px 12px;
   color: #e4e4e7;
@@ -598,7 +679,7 @@ body {
 
 .help-text {
   font-size: 12px;
-  color: #71717a;
+  color: var(--text-muted);
 }
 
 .form-group button {

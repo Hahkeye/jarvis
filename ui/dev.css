@@ -156,9 +156,33 @@ body {
   background: var(--bg-tertiary);
 }
 
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 .project-card h3 {
   font-size: 16px;
-  margin-bottom: 8px;
+  margin: 0;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  background: var(--error);
+  transform: scale(1.1);
 }
 
 .project-card p {
@@ -305,6 +329,43 @@ body {
   font-size: 12px;
   line-height: 1.5;
   background: var(--bg-primary);
+}
+
+.terminal-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border);
+}
+
+.terminal-prompt {
+  color: var(--accent);
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#terminalInput {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  outline: none;
+}
+
+#terminalInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+#terminalInput::placeholder {
+  color: var(--text-secondary);
 }
 
 .terminal-line {

@@ -9,6 +9,28 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const micBtn = document.getElementById("micBtn");
 const statusEl = document.querySelector(".status");
+const themeToggle = document.getElementById("themeToggle");
+
+// --- Theme Toggle ---
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("jarvis-theme", theme);
+  themeToggle.textContent = theme === "light" ? "☀️" : "🌙";
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem("jarvis-theme");
+  if (saved) {
+    applyTheme(saved);
+  } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+    applyTheme("light");
+  }
+})();
+
+themeToggle.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  applyTheme(current === "light" ? "dark" : "light");
+});
 
 // --- Toast Notifications ---
 let toastContainer = document.createElement("div");

@@ -1,6 +1,10 @@
 import type { ToolDefinition, ToolHandler } from "../ai";
-import { readFile, writeFile, mkdir, readdir, unlink, rename } from "fs/promises";
+import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import { join } from "path";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 const PROJECTS_DIR = join(process.cwd(), "projects");
 
@@ -402,6 +406,16 @@ export const deleteProjectToolHandler: ToolHandler["handler"] = async (
       setActiveProject(ws, undefined);
     }
     
+    // Emit structured event for frontend
+    const event = {
+      type: "tool_result",
+      tool: "delete_project",
+      result: name,
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
     return `Project "${name}" deleted successfully.`;
   } catch (e) {
     console.error("[PROJECTS] Failed to delete project:", e);
@@ -423,6 +437,17 @@ export const readProjectFileToolHandler: ToolHandler["handler"] = async (
   
   try {
     const content = await readFile(fullPath, "utf-8");
+    
+    // Emit structured event for frontend
+    const event = {
+      type: "tool_result",
+      tool: "read_project_file",
+      result: content,
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
     return `Content of ${filePath}:\n\n${content}`;
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
@@ -449,6 +474,17 @@ export const writeProjectFileToolHandler: ToolHandler["handler"] = async (
   try {
     await mkdir(join(fullPath, ".."), { recursive: true });
     await writeFile(fullPath, content);
+    
+    // Emit structured event for frontend
+    const event = {
+      type: "tool_result",
+      tool: "write_project_file",
+      result: `File written successfully: ${filePath}`,
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
     return `File written successfully: ${filePath}`;
   } catch (e) {
     console.error("[PROJECTS] Failed to write file:", e);
@@ -500,6 +536,58 @@ export const listProjectFilesToolHandler: ToolHandler["handler"] = async (
   }
 };
 
+export const executeCommandToolHandler: ToolHandler["handler"] = async (
+  args: Record<string, unknown>,
+  ws: WebSocket,
+): Promise<string> => {
+  const command = typeof args.command === "string" ? args.command : "";
+  
+  if (!command) return "Command is required.";
+  
+  const activeProject = getActiveProject(ws);
+  const cwd = activeProject ? getProjectPath(ws, activeProject) : process.cwd();
+  
+  console.log(`[CMD] ${command} (cwd: ${cwd})`);
+  
+  try {
+    const { stdout, stderr } = await execAsync(command, { 
+      cwd, 
+      timeout: 30000,
+      maxBuffer: 1024 * 1024, // 1MB
+    });
+    
+    let output = stdout;
+    if (stderr) {
+      output += (output ? "\n" : "") + stderr;
+    }
+    
+    // Emit structured event with output
+    const event = {
+      type: "tool_result",
+      tool: "execute_command",
+      result: output || "(no output)",
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
+    return output || "Command completed with no output.";
+  } catch (e: any) {
+    const errorOutput = e.stderr || e.message || String(e);
+    
+    const event = {
+      type: "tool_result",
+      tool: "execute_command",
+      result: `Error: ${errorOutput}`,
+    };
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(event));
+    }
+    
+    return `Command failed: ${errorOutput}`;
+  }
+};
+
 // Export all handlers
 export const projectTools = {
   listProjects: listProjectsToolHandler,
@@ -509,4 +597,5 @@ export const projectTools = {
   readProjectFile: readProjectFileToolHandler,
   writeProjectFile: writeProjectFileToolHandler,
   listProjectFiles: listProjectFilesToolHandler,
+  executeCommand: executeCommandToolHandler,
 };
